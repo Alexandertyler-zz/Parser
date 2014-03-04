@@ -84,16 +84,15 @@ nonterminal Expressions actuals, exp_list;
  * Precedence declarations.
  */
 /*** FILL-IN HERE ***/
-precedence nonassoc DOT;
-precedence nonassoc AT;
-precedence nonassoc NEG;
-precedence nonassoc ISVOID;
-precedence nonassoc MULT, DIV;
-precedence nonassoc PLUS, MINUS;
+precedence right ASSIGN;
+precedence left NOT;
 precedence nonassoc LT, LE, EQ;
-precedence nonassoc NOT;
-precedence nonassoc ASSIGN;
-
+precedence left PLUS, MINUS;
+precedence left MULT, DIV;
+precedence left ISVOID;
+precedence left NEG;
+precedence left AT;
+precedence left DOT;
 
 
 
