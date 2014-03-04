@@ -84,8 +84,15 @@ nonterminal Expressions actuals, exp_list;
  * Precedence declarations.
  */
 /*** FILL-IN HERE ***/
-
-
+precedence nonassoc DOT;
+precedence nonassoc AT;
+precedence nonassoc NEG;
+precedence nonassoc ISVOID;
+precedence nonassoc MULT, DIV;
+precedence nonassoc PLUS, MINUS;
+precedence nonassoc LT, LE, EQ;
+precedence nonassoc NOT;
+precedence nonassoc ASSIGN;
 
 
 
@@ -142,7 +149,16 @@ optional_feature_list
 
 /* Expressions */
 expr
-	::= expr:e1 PLUS expr:e2
+	::= 
+	|LET let_right:e1
+		{: RESULT = e1; :}
+	|CASE expr:e1 OF case_list:cl ESAC
+		{: RESULT = new typcase(curr_lineno(), e1, cl); :}
+	|NEW TYPEID:t
+		{: RESULT = new new_(curr_lineno(), t); :}
+	|ISVOID exp:e1
+		{: RESULT = new isvoid(curr_lineno(), e1); :}
+	|expr:e1 PLUS expr:e2
 	    {: RESULT = new plus(curr_lineno(), e1, e2); :}
 	| expr:e1 MINUS expr:e2
 	    {: RESULT = new sub(curr_lineno(), e1, e2); :}
@@ -154,10 +170,10 @@ expr
 	    {: RESULT = new neg(curr_lineno(), e); :}
 	| expr:e1 LT expr:e2
 	    {: RESULT = new lt(curr_lineno(), e1, e2); :}
-	| expr:e1 EQ expr:e2
-	    {: RESULT = new eq(curr_lineno(), e1, e2); :}
 	| expr:e1 LE expr:e2
 	    {: RESULT = new leq(curr_lineno(), e1, e2); :}
+	| expr:e1 EQ expr:e2
+	    {: RESULT = new eq(curr_lineno(), e1, e2); :}
 	| NOT expr:e
 	    {: RESULT = new comp(curr_lineno(), e); :}
 	| LPAREN expr:e RPAREN
