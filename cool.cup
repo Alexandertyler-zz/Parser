@@ -281,8 +281,9 @@ let_list
 block_list
     ::= expr:e1 SEMI
         {: RESULT = new Expressions(curr_lineno()).appendElement(e1); :}
-    |   block_list:b expr:e1 SEMI 
-        {: RESULT = b.appendElement(e1); :}
+    |   block_list:b_l expr:e1 SEMI 
+        {: RESULT = b_l.appendElement(e1); :}
+    
     ;
 
 
