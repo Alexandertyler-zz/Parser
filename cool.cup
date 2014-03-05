@@ -80,10 +80,14 @@ nonterminal Expression expr;
 nonterminal Expressions actuals, exp_list;
 
 
+
+
 /*
  * Precedence declarations.
  */
 /*** FILL-IN HERE ***/
+
+/*** THIS IS DONE ***/
 precedence right ASSIGN;
 precedence left NOT;
 precedence nonassoc LT, LE, EQ;
@@ -149,8 +153,20 @@ optional_feature_list
 /* Expressions */
 expr
 	::= 
-	|LET let_right:e1
-		{: RESULT = e1; :}
+    |OBJECTID:o ASSIGN expr:e1
+		{: RESULT = new assign(curr_lineno(), o, e1); :}
+	|expr:e1 AT TYPEID:t DOT OBJECTID:o LPAREN exp_list:e_l RPAREN
+		{: RESULT = new dispatch(curr_lineno(), e1, t, o, e_l); :}
+    |OBJECTID:o LPAREN exp_list:e_l RPAREN
+        {: RESULT = new dispatch(curr_lineno(), self, o, e_l); :}
+    |IF expr:e1 THEN expr:e2 ELSE expr:e3 FI
+        {: RESULT = new cond(curr_lineno(), e1, e2, e3); :}
+    |WHILE expr:e1 LOOP expr:e2 POOL
+        {: Result = new loop(curr_lineno(), e1, e2); :}
+   /* |LBRACE block_list:b_l RBRACE
+        {: RESULT = new block(curr_lineno(), b_l); :} */
+	|LET let_list:l_l
+		{: RESULT = l_1; :}
 	|CASE expr:e1 OF case_list:cl ESAC
 		{: RESULT = new typcase(curr_lineno(), e1, cl); :}
 	|NEW TYPEID:t
@@ -188,9 +204,8 @@ expr
 	| OBJECTID:n actuals:a
 	    {: RESULT = new dispatch(curr_lineno(),
 	                             new object(curr_lineno(), 
-	                                        AbstractTable.idtable.addString("self")),
-				     n, a); :}
-        ;
+	                                        AbstractTable.idtable.addString("self")), n, a); :}
+	;
 
 
 /* Method arguments */
@@ -213,3 +228,16 @@ exp_list
 	| exp_list:el COMMA expr:e
 	    {: RESULT = el.appendElement(e); :}
 	;
+
+/*use this for the right hand side of Let*/
+let_list
+    ::= OBJECTID:o COLON TYPEID:t ASSIGN expr:e1 COMMA let_list:l_l
+        {: RESULT = new let(curr_lineno(), o, t, e1, l_l); :}
+    |ObjectID:o COLON TYPEID:t ASSIGN expr:e1 IN expr:e2
+        {: RESULT = new let(curr_lineno(), o, t, e1, e2);
+    ;
+
+/*used for  {} blocks 
+block_list
+    ::= expr:e1 SEMI DARROW block_list:b_l
+        {: RESULT = new Expressions(curr_lineno(), */
