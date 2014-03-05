@@ -82,7 +82,9 @@ nonterminal Formals formal_list;
 nonterminal formal formal;
 nonterminal Expression expr;
 nonterminal Expressions actuals, exp_list;
-
+nonterminal Expressions block_list;
+nonterminal let let_list;
+nonterminal Cases case_list;
 
 
 
@@ -161,13 +163,11 @@ feature
         /* attributes*/
         ::= OBJECTID:o COLON TYPEID:t SEMI
             {: RESULT = new attr(curr_lineno(),o,t,new no_expr(curr_lineno())); :}
-        |   OBJECTID:o COLON TYPEID:t ASSIGN expression:e SEMI
-            {: RESULT = new attr(curr_lineno(),o,t,e); :}
+        |   OBJECTID:o COLON TYPEID:t ASSIGN expr:e1 SEMI
+            {: RESULT = new attr(curr_lineno(),o,t,e1); :}
         /* methods */
-        |   OBJECTID:o LPAREN formal_list:fl RPAREN COLON TYPEID:t LBRACE expression:e RBRACE SEMI
-            {: RESULT = new method(curr_lineno(),o,fl,t,e); :}
-        |   OBJECTID:o LPAREN empty_formal_list:efl RPAREN COLON TYPEID:t LBRACE expresson:e RBBRACE SEMI
-            {: RESULT = new method(curr_lineno(),o,efl,t,e); : }
+        |   OBJECTID:o LPAREN formal_list:fl RPAREN COLON TYPEID:t LBRACE expr:e1 RBRACE SEMI
+            {: RESULT = new method(curr_lineno(),o,fl,t,e1); :}
         ;
 
 formal_list
@@ -176,7 +176,7 @@ formal_list
         |   formal_list:fl COMMA formal:f
             {: RESULT = fl.appendElement(f); :}
         |   
-            {: RESULT = new Formals(curr_lineno())); :}
+            {: RESULT = new Formals(curr_lineno()); :}
         ;
 
 formal
@@ -197,16 +197,16 @@ expr
     |IF expr:e1 THEN expr:e2 ELSE expr:e3 FI
         {: RESULT = new cond(curr_lineno(), e1, e2, e3); :}
     |WHILE expr:e1 LOOP expr:e2 POOL
-        {: Result = new loop(curr_lineno(), e1, e2); :}
+        {: RESULT = new loop(curr_lineno(), e1, e2); :}
    |LBRACE block_list:b_l RBRACE
         {: RESULT = new block(curr_lineno(), b_l); :} 
 	|LET let_list:l_l
-		{: RESULT = l_1; :}
+		{: RESULT = l_l; :}
 	|CASE expr:e1 OF case_list:cl ESAC
 		{: RESULT = new typcase(curr_lineno(), e1, cl); :}
 	|NEW TYPEID:t
 		{: RESULT = new new_(curr_lineno(), t); :}
-	|ISVOID exp:e1
+	|ISVOID expr:e1
 		{: RESULT = new isvoid(curr_lineno(), e1); :}
 	|expr:e1 PLUS expr:e2
 	    {: RESULT = new plus(curr_lineno(), e1, e2); :}
@@ -269,26 +269,27 @@ let_list
     ::= OBJECTID:o COLON TYPEID:t ASSIGN expr:e1 COMMA let_list:l_l
         {: RESULT = new let(curr_lineno(), o, t, e1, l_l); :}
     |   OBJECTID:o COLON TYPEID:t IN expr:e1
-        {: RESULT = new let(curr_lineno(), o, t, new no_expr(curr_lineno()),e); :}
+        {: RESULT = new let(curr_lineno(), o, t, new no_expr(curr_lineno()),e1); :}
     |   OBJECTID:o COLON TYPEID:t COMMA let_list:l_l
-        {: RESULT = new let(curr_lineno(), o, t, new no_expr(curr_lineno()),lc); :}
+        {: RESULT = new let(curr_lineno(), o, t, new no_expr(curr_lineno()),l_l); :}
     |   OBJECTID:o COLON TYPEID:t ASSIGN expr:e1 IN expr:e2
-        {: RESULT = new let(curr_lineno(), o, t, e1, e2);
+        {: RESULT = new let(curr_lineno(), o, t, e1, e2); :}
     ;
 
-/*used for  {} blocks 
+/*used for  {} blocks */
 block_list
     ::= expr:e1 SEMI
         {: RESULT = new Expressions(curr_lineno()).appendElement(e1); :}
     |   block_list:b expr:e1 SEMI 
-        {: RESULT = new b.appendElement(e1); :}
+        {: RESULT = b.appendElement(e1); :}
     ;
 
 
 /* do later */
 case_list
     ::= OBJECTID:o COLON TYPEID:t DARROW expr:e SEMI
-        {: RESULT = new Cases(curr_lineno()).appendElement.(new branch(curr_lineno(), o ,t, e)); :}
+        {: RESULT = new Cases(curr_lineno()).appendElement(new branch(curr_lineno(), o ,t, e)); :}
     |   case_list:c_l OBJECTID:o COLON TYPEID:t DARROW expr:e SEMI
-        {: RESULT = c_l.appendElement(new branch(curr_lineno()),o, t, e)); :}
+        {: RESULT = c_l.appendElement(new branch(curr_lineno(),o, t, e)); :}
     ;
+
