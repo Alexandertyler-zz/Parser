@@ -153,7 +153,8 @@ optional_feature_list
 	    {: RESULT = new Features(curr_lineno()).appendElement(f); :}
         |   optional_feature_list:fl feature:f
             {: RESULT = fl.appendElement(f); :}
-        |   {: RESULT = new Features(curr_lineno()); :}
+        |   
+            {: RESULT = new Features(curr_lineno()); :}
 	;
 
 feature
@@ -174,7 +175,8 @@ formal_list
             {: RESULT = (new Formals(curr_lineno())).appendElement(f); :}
         |   formal_list:fl COMMA formal:f
             {: RESULT = fl.appendElement(f); :}
-        |   {: RESULT = new Formals(curr_lineno())); :}
+        |   
+            {: RESULT = new Formals(curr_lineno())); :}
         ;
 
 formal
@@ -182,11 +184,7 @@ formal
             {: RESULT = new formal(curr_lineno(),o,t); :}
         ;
 
-branch_list
-        ::= branch:b SEMI
-            {: RESULT = (new Cases(curr_lineno())).appendElement(b); :}
-        |   branch_list:bl branch:b SEMI
-            {: 
+
 /* Expressions */
 expr
 	::= 
@@ -200,8 +198,8 @@ expr
         {: RESULT = new cond(curr_lineno(), e1, e2, e3); :}
     |WHILE expr:e1 LOOP expr:e2 POOL
         {: Result = new loop(curr_lineno(), e1, e2); :}
-   /* |LBRACE block_list:b_l RBRACE
-        {: RESULT = new block(curr_lineno(), b_l); :} */
+   |LBRACE block_list:b_l RBRACE
+        {: RESULT = new block(curr_lineno(), b_l); :} 
 	|LET let_list:l_l
 		{: RESULT = l_1; :}
 	|CASE expr:e1 OF case_list:cl ESAC
@@ -278,10 +276,13 @@ let_list
         {: RESULT = new let(curr_lineno(), o, t, e1, e2);
     ;
 
-/*used for  {} blocks */
+/*used for  {} blocks 
 block_list
-    ::= expr:e1 SEMI DARROW block_list:b_l
-        {: RESULT = new Expressions(curr_lineno(), 
+    ::= expr:e1 SEMI
+        {: RESULT = new Expressions(curr_lineno()).appendElement(e1); :}
+    |   block_list:b expr:e1 SEMI 
+        {: RESULT = new b.appendElement(e1); :}
+    ;
 
 
 /* do later */
