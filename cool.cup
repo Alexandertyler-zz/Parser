@@ -210,8 +210,8 @@ expr
 		{: RESULT = new static_dispatch(curr_lineno(), e1, t, o, e_l); :}
              
     /*Needed a case for e1.object() */
-    |expr:e1 TYPEID:t DOT OBJECTID:o LPAREN exp_list:e_l RPAREN
-        {: RESULT = new dispatch(curr_lineno(), e1, t, o, e_l); :}
+    |expr:e1 DOT OBJECTID:o LPAREN exp_list:e_l RPAREN
+        {: RESULT = new dispatch(curr_lineno(), e1, o, e_l); :}
     
     /*Obj(e1), Calling a method of Object o */
     |OBJECTID:o LPAREN exp_list:e_l RPAREN
