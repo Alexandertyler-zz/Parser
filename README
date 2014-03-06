@@ -155,3 +155,14 @@ Instructions
 
 Write-up for PA3J
 -----------------
+This was an interesting project in the sense that there was a lot of obfuscation before
+fully understanding the file. Like the last project though, once my partner and
+I figured out the layout of the cool.cup file, it was simple enough. We walked through
+the cool manual and figured out the main grammar rules that we needed. My first step was
+getting all the terminals down with their precedences. After that we moved on to the 
+expressions, using the manuals guide to help us with the syntax. As we wrote the expressions
+we also wrote the grammar rules that were needed for things like let and case. We then added
+the new nonterminals to the list of nonterminals. For error testing, we implemented the error 
+checks stated in the project guidelines and wrote many test cases to check for the issues. 
+After running our parser on both the good and bad test files, we believe it to be correct.
+
