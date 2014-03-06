@@ -72,6 +72,11 @@ terminal AbstractSymbol TYPEID, OBJECTID;
  *
  * Hint: You will have to add/modify this list.
  */
+
+/* Added the required nonterminals in order to make the parser function
+ * according to the cool manual spec.
+ */
+
 nonterminal programc program;
 nonterminal Classes class_list;
 nonterminal class_c class;
@@ -94,6 +99,11 @@ nonterminal Cases case_list;
 /*** FILL-IN HERE ***/
 
 /*** THIS IS DONE ***/
+/* Copied this from the page on precedence in the cool manual. 
+ * Had to reverse the order so that it matches the way the parser
+ * interprets them. Highest precedence is at the top.
+ */
+
 precedence right ASSIGN;
 precedence left NOT;
 precedence nonassoc LT, LE, EQ;
@@ -170,6 +180,7 @@ feature
             {: RESULT = new method(curr_lineno(),o,fl,t,e1); :}
         ;
 
+/* The list of formals passed in to a method when declaring it. */ 
 formal_list
         ::= formal:f
             {: RESULT = (new Formals(curr_lineno())).appendElement(f); :}
@@ -178,7 +189,9 @@ formal_list
         |   
             {: RESULT = new Formals(curr_lineno()); :}
         ;
-
+/* Arguements to a method when you are declaring it.
+ * Called by formal_list
+*/
 formal
         ::= OBJECTID:o COLON TYPEID:t
             {: RESULT = new formalc(curr_lineno(),o,t); :}
@@ -188,24 +201,45 @@ formal
 /* Expressions */
 expr
 	::= 
-    |OBJECTID:o ASSIGN expr:e1
+    /* Obj <- e1, standard assignment in cool*/
+    OBJECTID:o ASSIGN expr:e1
 		{: RESULT = new assign(curr_lineno(), o, e1); :}
-	|expr:e1 AT TYPEID:t DOT OBJECTID:o LPAREN exp_list:e_l RPAREN
+    
+    /* e1@t.Obj(e_l), calling a method of on object*/
+    |expr:e1 AT TYPEID:t DOT OBJECTID:o LPAREN exp_list:e_l RPAREN
 		{: RESULT = new static_dispatch(curr_lineno(), e1, t, o, e_l); :}
+             
+    /*Needed a case for e1.object() */
+    |expr:e1 TYPEID:t DOT OBJECTID:o LPAREN exp_list:e_l RPAREN
+        {: RESULT = new dispatch(curr_lineno(), e1, t, o, e_l); :}
+    
+    /*Obj(e1), Calling a method of Object o */
     |OBJECTID:o LPAREN exp_list:e_l RPAREN
         {: RESULT = new dispatch(curr_lineno(), new object(curr_lineno(), 
             AbstractTable.idtable.addString("self")), o, e_l); :}
+     
+    /* If e1 then e2 else e3 fi, Standard if then else in cool */
     |IF expr:e1 THEN expr:e2 ELSE expr:e3 FI
         {: RESULT = new cond(curr_lineno(), e1, e2, e3); :}
+    
+    /*While e1 loop e2 pool, While loop but e1 should be some bool eval */
     |WHILE expr:e1 LOOP expr:e2 POOL
         {: RESULT = new loop(curr_lineno(), e1, e2); :}
-   |LBRACE block_list:b_l RBRACE
+    
+    /* { block }, this should call a new grammar rule to eval a block */
+    |LBRACE block_list:b_l RBRACE
         {: RESULT = new block(curr_lineno(), b_l); :} 
-	|LET let_list:l_l
+	
+    /* let e1 <- e2 in e3, this needs to be a new rule call to allow nesting */
+    |LET let_list:l_l
 		{: RESULT = l_l; :}
-	|CASE expr:e1 OF case_list:cl ESAC
+	
+    /*Case e1 of case_list esac, This needs a case list to be evald as a new rule */
+    |CASE expr:e1 OF case_list:cl ESAC
 		{: RESULT = new typcase(curr_lineno(), e1, cl); :}
-	|NEW TYPEID:t
+	
+    /* the rest of these are straightforward */
+    |NEW TYPEID:t
 		{: RESULT = new new_(curr_lineno(), t); :}
 	|ISVOID expr:e1
 		{: RESULT = new isvoid(curr_lineno(), e1); :}
@@ -287,7 +321,7 @@ block_list
     ;
 
 
-/* do later */
+/*  */
 case_list
     ::= OBJECTID:o COLON TYPEID:t DARROW expr:e SEMI
         {: RESULT = new Cases(curr_lineno()).appendElement(new branch(curr_lineno(), o ,t, e)); :}
