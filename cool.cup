@@ -187,8 +187,7 @@ formal
 
 /* Expressions */
 expr
-	::= 
-    |OBJECTID:o ASSIGN expr:e1
+	::= OBJECTID:o ASSIGN expr:e1
 		{: RESULT = new assign(curr_lineno(), o, e1); :}
 	|expr:e1 AT TYPEID:t DOT OBJECTID:o LPAREN exp_list:e_l RPAREN
 		{: RESULT = new static_dispatch(curr_lineno(), e1, t, o, e_l); :}
