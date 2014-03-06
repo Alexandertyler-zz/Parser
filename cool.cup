@@ -289,7 +289,7 @@ actuals
 	;
 
 
-/* Non-empty list of expressions */
+/* Non-empty or empty list of expressions */
 exp_list
         /* One expression */
 	::= expr:e
@@ -297,6 +297,9 @@ exp_list
         /* Several expressions */
 	| exp_list:el COMMA expr:e
 	    {: RESULT = el.appendElement(e); :}
+        /* Empty expression list */
+        | 
+            {: RESULT = new Expressions(curr_lineno()); :}
 	;
 
 /*use this for the right hand side of Let*/
